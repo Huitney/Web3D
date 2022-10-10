@@ -16,6 +16,7 @@
 <div id='heading'>
 	<h3 style = "color:red">Xmas Lights</h3><p>
 	<button id = 'lightToggle'>Lights On</button>
+	<button id = 'changeCycle'>Random Cycle</button>
 </div>
 
 <div>
@@ -43,6 +44,7 @@ class Light {
 		this.hue = Math.random()*360;
 		this.myStatus = false;
 		this.buttonClick = false;
+		this.dutyCycle = 0.5;
 		
 		this.element = document.createElement ('div');
 		this.element.id = 'light';
@@ -54,7 +56,7 @@ class Light {
 		document.getElementsByTagName('body')[0].appendChild(this.element);
 		
 		var self = this;
-		setInterval(function(){
+		setTimeout(function(){
 			self.toggle();
 		}, 500);
 	}
@@ -68,6 +70,10 @@ class Light {
 		} else {
 			self.element.style.background = "hsl("+self.hue+",90%,24%)";
 		}
+		
+		setTimeout(function(){
+			self.toggle();
+		}, self.dutyCycle * 1000);
 	}
 
 }
@@ -81,7 +87,20 @@ $('#lightToggle').click ( function() {
 	
 });
 
-var lights = [];
+$('#changeCycle').click ( function() {
+	
+	if(randomCycle === true){
+		lights.forEach (function (light) { light.dutyCycle = 0.5 } );
+		$('#changeCycle').text('Random Cycle');
+	}else{
+		lights.forEach (function (light) { light.dutyCycle = Math.random() } );
+		$('#changeCycle').text('Same Cycle');
+	}
+	
+	randomCycle =! randomCycle;
+});
+
+var lights = [], randomCycle = false;
 
 init();
 
