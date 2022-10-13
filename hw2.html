@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>
+</title>
+<style>
+#heading{
+	text-align: center;
+	position:absolute;
+	width:100vw;
+}
+</style>
+</head>
+<body style='overflow:hidden;max-width:1000px;min-width:1000px;'> 
+
+<div id='heading'>
+	<h3 style = "color:red">Vector3 API</h3><p>
+</div>
+
+<div style="position:absolute;top:10vw;left:25vw;width:20vw;border-radius:15px;background:yellow;border-style:solid;">
+	&nbsp;&nbsp;v<br><hr>
+	&nbsp;&nbsp;x<textarea id="vx" name="vx" rows="1"></textarea><br>
+	&nbsp;&nbsp;y<textarea id="vy" name="vy" rows="1"></textarea><br>
+	&nbsp;&nbsp;z<textarea id="vz" name="vz" rows="1"></textarea><br>
+</div>
+
+<div style="position:absolute;top:20vw;left:25vw;width:20vw;border-radius:15px;background:yellow;border-style:solid;">
+	&nbsp;&nbsp;w<br><hr>
+	&nbsp;&nbsp;x<textarea id="wx" name="wx" rows="1"></textarea><br>
+	&nbsp;&nbsp;y<textarea id="wy" name="wy" rows="1"></textarea><br>
+	&nbsp;&nbsp;z<textarea id="wz" name="wz" rows="1"></textarea><br>
+</div>
+
+<div style="position:absolute;top:10vw;left:50vw;width:20vw;border-radius:15px;background:yellow;border-style:solid;">
+	&nbsp;&nbsp;inner product<br><hr>
+	&nbsp;&nbsp;v&#183;w<textarea id="vw" name="vw" rows="1"></textarea><br><br><br>
+	
+	&nbsp;&nbsp;v&#215;w(vector product)<br><hr>
+	&nbsp;&nbsp;x<textarea id="vwx" name="vwx" rows="1"></textarea><br>
+	&nbsp;&nbsp;y<textarea id="vwy" name="vwy" rows="1"></textarea><br>
+	&nbsp;&nbsp;z<textarea id="vwz" name="vwz" rows="1"></textarea><br>
+</div>
+
+<script src="https://threejs.org/build/three.min.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+
+<script type ="module">
+
+$('#vx').bind('input propertychange', function() {
+    vvx = $("#vx").val();
+	innerProduct();
+	vectorProduct();
+});
+
+$('#vy').bind('input propertychange', function() {
+    vvy = $("#vy").val();
+	innerProduct();
+	vectorProduct();
+});
+
+$('#vz').bind('input propertychange', function() {
+    vvz = $("#vz").val();
+	innerProduct();
+	vectorProduct();
+});
+
+$('#wx').bind('input propertychange', function() {
+    wwx = $("#wx").val();
+	innerProduct();
+	vectorProduct();
+});
+
+$('#wy').bind('input propertychange', function() {
+    wwy = $("#wy").val();
+	innerProduct();
+	vectorProduct();
+});
+
+$('#wz').bind('input propertychange', function() {
+    wwz = $("#wz").val();
+	innerProduct();
+	vectorProduct();
+});
+
+var vvx, vvy, vvz, wwx, wwy, wwz;
+
+function innerProduct(){
+	if(vvx !== undefined & vvy !== undefined & vvz !== undefined & wwx !== undefined & wwy !== undefined & wwz !== undefined){
+		let vv = new THREE.Vector3(vvx, vvy, vvz), ww = new THREE.Vector3(wwx, wwy, wwz);
+		$('#vw').val(vv.dot(ww));
+	}
+}
+
+function vectorProduct(){
+	if(vvx !== undefined & vvy !== undefined & vvz !== undefined & wwx !== undefined & wwy !== undefined & wwz !== undefined){
+		let vv = new THREE.Vector3(vvx, vvy, vvz), ww = new THREE.Vector3(wwx, wwy, wwz);
+		let vvww = vv.cross(ww);
+		$('#vwx').val(vvww.x);
+		$('#vwy').val(vvww.y);
+		$('#vwz').val(vvww.z);
+	}
+}
+
+function onWindowResize() {
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+	renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+</script>
+
+</body>
+</html>
