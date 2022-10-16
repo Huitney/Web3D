@@ -23,21 +23,7 @@
 <img src="https://i.imgur.com/Cy8nAFl.png" style="position:absolute;top:0vw;left:35vw;width:30vw;z-index:-1">
 </div>
 
-<script type="importmap">
-{
-    "imports": {
-        "three": "https://unpkg.com/three/build/three.module.js"
-    }
-}
-</script>
-<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-
 <script type ="module">
-javascript:(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='https://mrdoob.github.io/stats.js/build/stats.min.js';document.head.appendChild(script);})()
-
-import * as THREE from 'three';
-
-
 class Light {
   
 	constructor(ww, hh) {  
@@ -119,15 +105,6 @@ function onWindowResize() {
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
 	renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-function animate() {
-	requestAnimationFrame(animate);
-	render();
-}
-
-function render() {
-  renderer.render(scene, camera);
 }
 
 </script>
