@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>
+</title>
+<style>
+#heading{
+	text-align: center;
+	position:absolute;
+	width:100vw;
+}
+</style>
+</head>
+<body style='overflow:hidden'> 
+
+<div id='heading'>
+	<h3 style = "color:red">hw3 - <a href="https://i.imgur.com/dT95jlH.png">設計圖</a></h3>
+	<button id = "changeView">changeView</button>
+</div>
+
+<script src="https://threejs.org/build/three.min.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+javascript:(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='https://mrdoob.github.io/stats.js/build/stats.min.js';document.head.appendChild(script);})()
+
+// my script
+
+$('#changeView').click ( function() {
+	chV =! chV;
+});
+
+var camera, camera2, scene, renderer;
+var chV = false;
+
+
+init();
+animate();
+
+function init() {
+	scene = new THREE.Scene();
+
+	renderer = new THREE.WebGLRenderer();
+	renderer.setSize(window.innerWidth, window.innerHeight);
+	renderer.setClearColor(0x888888);
+	document.body.appendChild(renderer.domElement);
+
+	camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
+	camera2 = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
+	
+	camera2.position.set(-115, 40, 0);
+	camera2.lookAt(100, 20, 0);
+	camera.position.set(0, 40, 80);
+	camera.lookAt(0, 50, -100);
+	
+	let controls = new THREE.OrbitControls(camera, renderer.domElement);//開啟會導致camera的lookAt無法作用
+	
+	var gridXZ = new THREE.GridHelper(400, 20, 'red', 'white');
+	//scene.add(gridXZ);
+	////////////////////////////////////
+	buildScene();
+	buildArt();
+
+}
+
+function onWindowResize() {
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+	renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function animate() {
+	
+	if(chV)
+		renderer.render(scene,camera2);
+	else
+		renderer.render(scene,camera);
+	requestAnimationFrame( animate );
+}
+
+function buildArt(){
+	let loader = new THREE.TextureLoader()
+	loader.crossOrigin = '';
+	
+	let artTex1 = loader.load("https://i.imgur.com/oKCilGz.png");
+	let art1 = new THREE.Mesh(new THREE.PlaneGeometry(50, 40), new THREE.MeshLambertMaterial({map: artTex1}));
+	art1.position.set(0, 100, -109);
+	
+	let fraTex1 = loader.load("https://i.imgur.com/SH4rnV5.png");
+	let frame1 = new THREE.Mesh(new THREE.PlaneGeometry(66, 60), new THREE.MeshLambertMaterial({map: fraTex1}));
+	frame1.position.set(0, 100, -109.5);
+	
+	let artTex2 = loader.load("https://i.imgur.com/EGKpEVM.png");
+	let art2 = new THREE.Mesh(new THREE.PlaneGeometry(61, 76), new THREE.MeshLambertMaterial({map: artTex2}));
+	art2.position.set(-61, 60, 0);
+	art2.rotation.y = -Math.PI/2;
+	
+	let fraTex2 = loader.load("https://i.imgur.com/SH4rnV5.png");
+	let frame2 = new THREE.Mesh(new THREE.PlaneGeometry(77, 106), new THREE.MeshLambertMaterial({map: fraTex2}));
+	frame2.position.set(-60.5, 60, 0);
+	frame2.rotation.y = -Math.PI/2;
+	
+	scene.add(art1, art2, frame1, frame2);
+}
+
+function buildLight(w, w1, w3, w4){
+	var spotLight = new THREE.SpotLight(0xffffff, 3, 150, Math.PI/10, 0.3, 2);
+	spotLight.position.set(0, 150, -80);
+	spotLight.target = w4;
+	
+	var dirLight = new THREE.DirectionalLight(0xffffff, 1);
+	dirLight.position.y = 200;
+	dirLight.target = w;
+	
+	var dirLight2 = new THREE.DirectionalLight(0xffffff, 1);
+	dirLight2.position.y = 200;
+	dirLight2.target = w3;
+	
+	var dirLight3 = new THREE.DirectionalLight(0xffffff, 1);
+	dirLight3.position.y = 200;
+	dirLight3.target = w4;
+	
+	var dirLight4 = new THREE.DirectionalLight(0xffffff, 1);
+	dirLight4.position.y = 200;
+	dirLight4.target = w1;
+	
+	scene.add(spotLight, new THREE.SpotLightHelper (spotLight));
+	scene.add(dirLight, dirLight2, dirLight3, dirLight4);
+}
+
+function buildScene(){
+	let wall = new THREE.Mesh(new THREE.BoxGeometry(5, 200, 230), new THREE.MeshLambertMaterial());
+	wall.position.set(117.5, 100, 0);
+	
+	let wall1 = new THREE.Mesh(new THREE.BoxGeometry(5, 200, 90), new THREE.MeshLambertMaterial());
+	wall1.position.set(75, 100, 112.5);
+	wall1.rotation.y = Math.PI/2;
+	
+	let wall2 = new THREE.Mesh(new THREE.BoxGeometry(5, 200, 105), new THREE.MeshLambertMaterial());
+	wall2.position.set(-67.5, 100, 112.5);
+	wall2.rotation.y = Math.PI/2;
+	
+	let wall3 = new THREE.Mesh(new THREE.BoxGeometry(5, 200, 230), new THREE.MeshLambertMaterial());
+	wall3.position.set(-117.5, 100, 0);
+	
+	let wall4 = new THREE.Mesh(new THREE.BoxGeometry(5, 200, 240), new THREE.MeshLambertMaterial());
+	wall4.position.set(0, 100, -112.5);
+	wall4.rotation.y = Math.PI/2;
+	
+	let wall5 = new THREE.Mesh(new THREE.BoxGeometry(5, 200, 100), new THREE.MeshLambertMaterial());
+	wall5.position.set(-57.5, 100, 0);
+	
+	let wall6 = new THREE.Mesh(new THREE.BoxGeometry(5, 200, 60), new THREE.MeshLambertMaterial());
+	wall6.position.set(32.5, 100, 30);
+	
+	let loader = new THREE.TextureLoader()
+	loader.crossOrigin = '';
+	let floorTex = loader.load("https://i.imgur.com/7a6SbxD.png");
+	floorTex.wrapS = THREE.RepeatWrapping;
+	floorTex.wrapT = THREE.RepeatWrapping;
+	floorTex.repeat.set(10, 10);
+	let floor = new THREE.Mesh(new THREE.PlaneGeometry(240, 230), new THREE.MeshBasicMaterial({map: floorTex, side:THREE.DoubleSide}));
+	floor.rotation.x = Math.PI/2;
+	
+	scene.add(wall, wall1, wall2, wall3, wall4, wall5, wall6, floor);
+	
+	buildChair(32.5, 0, -55);
+	buildChair(27.5, 0, -55);
+	buildLight(wall, wall1, wall3, wall4);
+}
+
+function buildChair(x, y, z){
+	
+	let chairLeg, chairLeg2, chairLeg3, chairLeg4;
+	chairLeg = new THREE.Mesh(new THREE.BoxGeometry(1, 10, 1), new THREE.MeshLambertMaterial({color:"black"}));
+	chairLeg2 = new THREE.Mesh(new THREE.BoxGeometry(1, 10, 1), new THREE.MeshLambertMaterial({color:"black"}));
+	chairLeg3 = new THREE.Mesh(new THREE.BoxGeometry(1, 10, 1), new THREE.MeshLambertMaterial({color:"black"}));
+	chairLeg4 = new THREE.Mesh(new THREE.BoxGeometry(1, 10, 1), new THREE.MeshLambertMaterial({color:"black"}));
+	
+	chairLeg.position.set(2, 5, 14.5);
+	chairLeg2.position.set(2, 5, -14.5);
+	chairLeg3.position.set(-2, 5, 14.5);
+	chairLeg4.position.set(-2, 5, -14.5);
+	
+	let loader = new THREE.TextureLoader()
+	loader.crossOrigin = '';
+	let cushionTex = loader.load("https://i.imgur.com/YBM7wpl.png");
+	let cushion = new THREE.Mesh(new THREE.BoxGeometry(30, 1, 5), new THREE.MeshLambertMaterial({map: cushionTex, side:THREE.DoubleSide, color:0x8f8f2f}));
+	cushion.position.set(0, 10.5, 0);
+	cushion.rotation.y = Math.PI/2;
+	
+	let chair = new THREE.Group();
+	chair.add(chairLeg, chairLeg2, chairLeg3, chairLeg4, cushion);
+	
+	scene.add(chair);
+	chair.position.set(x, y, z)
+	
+}
+</script>
+
+</body>
+</html>
