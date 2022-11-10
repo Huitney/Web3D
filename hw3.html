@@ -38,11 +38,10 @@ class Light {
 		this.pos = new THREE.Vector3(x, y, z);
 		this.mesh.position.set(x, y, z);
 		this.mesh.target = tar;
-		this.helper = new THREE.SpotLightHelper(this.mesh);
-		//this.helper.lookAt(tar.position);
+		//this.helper = new THREE.SpotLightHelper(this.mesh);
 		//this.mesh.castShadow = true;
 		
-		scene.add(this.mesh, this.helper);
+		scene.add(this.mesh);//, this.helper);
 	}
 	
 }
