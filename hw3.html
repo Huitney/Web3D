@@ -28,11 +28,27 @@ javascript:(function(){var script=document.createElement('script');script.onload
 // my script
 
 $('#changeView').click ( function() {
-	chV =! chV;
+	chV += 1;
+	if(chV > 3) chV = 0;
 });
 
-var camera, camera2, scene, renderer;
-var chV = false;
+class Light {
+	constructor(x, y, z, i, tar) {
+		this.mesh = new THREE.SpotLight(0xffffff, i, 200, Math.PI / 6, 0.5);
+		this.pos = new THREE.Vector3(x, y, z);
+		this.mesh.position.set(x, y, z);
+		this.mesh.target = tar;
+		this.helper = new THREE.SpotLightHelper(this.mesh);
+		//this.helper.lookAt(tar.position);
+		//this.mesh.castShadow = true;
+		
+		scene.add(this.mesh, this.helper);
+	}
+	
+}
+
+var camera, camera2, camera3, scene, renderer;
+var chV = 0;
 
 
 init();
@@ -48,12 +64,15 @@ function init() {
 
 	camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
 	camera2 = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
+	camera3 = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
 	
-	camera2.position.set(-115, 40, 0);
-	camera2.lookAt(100, 20, 0);
 	camera.position.set(0, 40, 80);
 	camera.lookAt(0, 50, -100);
-	
+	camera2.position.set(-115, 50, 0);
+	camera2.lookAt(100, 150, 0);
+	camera3.position.set(-133, 305, 37);
+	camera3.lookAt(50, 0, -50);
+		
 	let controls = new THREE.OrbitControls(camera, renderer.domElement);//開啟會導致camera的lookAt無法作用
 	
 	var gridXZ = new THREE.GridHelper(400, 20, 'red', 'white');
@@ -72,10 +91,12 @@ function onWindowResize() {
 
 function animate() {
 	
-	if(chV)
+	if(chV === 0)
+		renderer.render(scene,camera);
+	else if(chV === 1)
 		renderer.render(scene,camera2);
 	else
-		renderer.render(scene,camera);
+		renderer.render(scene,camera3);
 	requestAnimationFrame( animate );
 }
 
@@ -84,49 +105,54 @@ function buildArt(){
 	loader.crossOrigin = '';
 	
 	let artTex1 = loader.load("https://i.imgur.com/oKCilGz.png");
-	let art1 = new THREE.Mesh(new THREE.PlaneGeometry(50, 40), new THREE.MeshLambertMaterial({map: artTex1}));
+	var art1 = new THREE.Mesh(new THREE.PlaneGeometry(50, 40), new THREE.MeshLambertMaterial({map: artTex1}));
 	art1.position.set(0, 100, -109);
 	
-	let fraTex1 = loader.load("https://i.imgur.com/SH4rnV5.png");
-	let frame1 = new THREE.Mesh(new THREE.PlaneGeometry(66, 60), new THREE.MeshLambertMaterial({map: fraTex1}));
+	var light1 = new Light(0, 140, -29, 1, art1);
+	
+	let fraTex = loader.load("https://i.imgur.com/SH4rnV5.png");
+	let frame1 = new THREE.Mesh(new THREE.PlaneGeometry(66, 60), new THREE.MeshLambertMaterial({map: fraTex}));
 	frame1.position.set(0, 100, -109.5);
 	
 	let artTex2 = loader.load("https://i.imgur.com/EGKpEVM.png");
-	let art2 = new THREE.Mesh(new THREE.PlaneGeometry(61, 76), new THREE.MeshLambertMaterial({map: artTex2}));
+	var art2 = new THREE.Mesh(new THREE.PlaneGeometry(61, 76), new THREE.MeshLambertMaterial({map: artTex2}));
 	art2.position.set(-61, 60, 0);
 	art2.rotation.y = -Math.PI/2;
 	
-	let fraTex2 = loader.load("https://i.imgur.com/SH4rnV5.png");
-	let frame2 = new THREE.Mesh(new THREE.PlaneGeometry(77, 106), new THREE.MeshLambertMaterial({map: fraTex2}));
+	var light2 = new Light(-111, 200, 0, 2, art2);
+	
+	let frame2 = new THREE.Mesh(new THREE.PlaneGeometry(77, 106), new THREE.MeshLambertMaterial({map: fraTex}));
 	frame2.position.set(-60.5, 60, 0);
 	frame2.rotation.y = -Math.PI/2;
 	
-	scene.add(art1, art2, frame1, frame2);
+	let artTex3 = loader.load("https://i.imgur.com/Xhfdj3V.png");
+	var art3 = new THREE.Mesh(new THREE.PlaneGeometry(48, 64), new THREE.MeshLambertMaterial({map: artTex3}));
+	art3.position.set(107.5, 100, 0);
+	art3.rotation.y = -Math.PI/2;
+	
+	var light3 = new Light(50, 200, 0, 2, art3);
+	
+	let frame3 = new THREE.Mesh(new THREE.PlaneGeometry(64, 94), new THREE.MeshLambertMaterial({map: fraTex}));
+	frame3.position.set(108, 100, 0);
+	frame3.rotation.y = -Math.PI/2;
+	
+	scene.add(art1, art2, art3, frame1, frame2, frame3);
 }
 
-function buildLight(w, w1, w3, w4){
-	var spotLight = new THREE.SpotLight(0xffffff, 3, 150, Math.PI/10, 0.3, 2);
-	spotLight.position.set(0, 150, -80);
-	spotLight.target = w4;
-	
-	var dirLight = new THREE.DirectionalLight(0xffffff, 1);
-	dirLight.position.y = 200;
-	dirLight.target = w;
+function buildLight(w1, w3, w4){
+	var dirLight1 = new THREE.DirectionalLight(0xffffff, 1);
+	dirLight1.position.y = 200;
+	dirLight1.target = w3;
 	
 	var dirLight2 = new THREE.DirectionalLight(0xffffff, 1);
 	dirLight2.position.y = 200;
-	dirLight2.target = w3;
+	dirLight2.target = w4;
 	
 	var dirLight3 = new THREE.DirectionalLight(0xffffff, 1);
 	dirLight3.position.y = 200;
-	dirLight3.target = w4;
+	dirLight3.target = w1;
 	
-	var dirLight4 = new THREE.DirectionalLight(0xffffff, 1);
-	dirLight4.position.y = 200;
-	dirLight4.target = w1;
-	
-	scene.add(spotLight, new THREE.SpotLightHelper (spotLight));
-	scene.add(dirLight, dirLight2, dirLight3, dirLight4);
+	scene.add(dirLight1, dirLight2, dirLight3);
 }
 
 function buildScene(){
@@ -160,14 +186,15 @@ function buildScene(){
 	floorTex.wrapS = THREE.RepeatWrapping;
 	floorTex.wrapT = THREE.RepeatWrapping;
 	floorTex.repeat.set(10, 10);
-	let floor = new THREE.Mesh(new THREE.PlaneGeometry(240, 230), new THREE.MeshBasicMaterial({map: floorTex, side:THREE.DoubleSide}));
-	floor.rotation.x = Math.PI/2;
+	let floor = new THREE.Mesh(new THREE.PlaneGeometry(240, 230), new THREE.MeshBasicMaterial({map: floorTex}));
+	floor.rotation.x = -Math.PI/2;
 	
 	scene.add(wall, wall1, wall2, wall3, wall4, wall5, wall6, floor);
 	
 	buildChair(32.5, 0, -55);
 	buildChair(27.5, 0, -55);
-	buildLight(wall, wall1, wall3, wall4);
+	buildArt();
+	buildLight(wall1, wall3, wall4);
 }
 
 function buildChair(x, y, z){
