@@ -16,6 +16,8 @@
 <div id='heading'>
 	<h3 style = "color:red">hw3 - <a href="https://i.imgur.com/dT95jlH.png">設計圖</a></h3>
 	<button id = "changeView">changeView</button>
+	<button id = "lightsOff">lightsOff</button><br>
+	<input type="range" min="1" max="100" value="100" class="slider" id="lightyRange">
 </div>
 
 <script src="https://threejs.org/build/three.min.js"></script>
@@ -32,22 +34,44 @@ $('#changeView').click ( function() {
 	if(chV > 3) chV = 0;
 });
 
+$('#lightsOff').click ( function() {
+	lightsOff =! lightsOff;
+	if(lightsOff){
+		lights.forEach (function(l) {scene.remove(l.mesh);});
+		$('#lightsOff').html('lightsOn');
+	}else{
+		lights.forEach (function(l) {scene.add(l.mesh);});
+		$('#lightsOff').html('lightsOff');
+	}
+});
+
 class Light {
 	constructor(x, y, z, i, tar) {
 		this.mesh = new THREE.SpotLight(0xffffff, i, 200, Math.PI / 6, 0.5);
 		this.pos = new THREE.Vector3(x, y, z);
+		this.inten = i;
 		this.mesh.position.set(x, y, z);
 		this.mesh.target = tar;
 		//this.helper = new THREE.SpotLightHelper(this.mesh);
 		//this.mesh.castShadow = true;
 		
-		scene.add(this.mesh);//, this.helper);
+		//lamp
+		this.lamp = new THREE.Mesh (new THREE.CylinderGeometry (5,2,10,20), new THREE.MeshNormalMaterial());
+		this.lampGroup = new THREE.Group();
+		this.lamp.rotation.x = Math.PI/2;
+		this.lamp.position.set (0,0,5);
+		this.lampGroup.add(this.lamp);
+		this.lampGroup.position.copy (this.mesh.position);
+		this.lampGroup.lookAt(tar.position);
+		
+		scene.add(this.mesh, this.lampGroup);//, this.helper);
 	}
 	
 }
 
 var camera, camera2, camera3, scene, renderer;
-var chV = 0;
+var chV = 0, lights = [], lightsOff = false;
+var slider = document.getElementById("lightyRange");
 
 
 init();
@@ -72,13 +96,13 @@ function init() {
 	camera3.position.set(-133, 305, 37);
 	camera3.lookAt(50, 0, -50);
 		
-	let controls = new THREE.OrbitControls(camera, renderer.domElement);//開啟會導致camera的lookAt無法作用
+	//let controls = new THREE.OrbitControls(camera, renderer.domElement);//開啟會導致camera的lookAt無法作用
 	
 	var gridXZ = new THREE.GridHelper(400, 20, 'red', 'white');
 	//scene.add(gridXZ);
 	////////////////////////////////////
 	buildScene();
-	buildArt();
+	//buildArt();
 
 }
 
@@ -96,6 +120,9 @@ function animate() {
 		renderer.render(scene,camera2);
 	else
 		renderer.render(scene,camera3);
+	
+	lights.forEach (function(l) {l.mesh.intensity = l.inten * (slider.value / 100);});
+	
 	requestAnimationFrame( animate );
 }
 
@@ -107,7 +134,7 @@ function buildArt(){
 	var art1 = new THREE.Mesh(new THREE.PlaneGeometry(50, 40), new THREE.MeshLambertMaterial({map: artTex1}));
 	art1.position.set(0, 100, -109);
 	
-	var light1 = new Light(0, 140, -29, 1, art1);
+	var light1 = new Light(0, 200, -29, 1, art1);
 	
 	let fraTex = loader.load("https://i.imgur.com/SH4rnV5.png");
 	let frame1 = new THREE.Mesh(new THREE.PlaneGeometry(66, 60), new THREE.MeshLambertMaterial({map: fraTex}));
@@ -136,6 +163,7 @@ function buildArt(){
 	frame3.rotation.y = -Math.PI/2;
 	
 	scene.add(art1, art2, art3, frame1, frame2, frame3);
+	lights.push(light1, light2, light3);
 }
 
 function buildLight(w1, w3, w4){
