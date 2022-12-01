@@ -96,24 +96,6 @@ $('#restore').click(function() {
 
 });
 
-function buildSphere(rad, pos) {
-
-	var sphere = new THREE.Mesh(new THREE.SphereGeometry(rad, 20, 20), new THREE.MeshNormalMaterial());
-
-	scene.add(sphere);
-	var prop = {
-		rad: rad,
-		pos: [pos.x, pos.z]
-	};
-	console.log(prop);
-	sphere.name = JSON.stringify(prop);
-	console.log(sphere.name);
-
-	furnitures.push(sphere);
-	sphere.position.copy(pos);
-
-}
-
 function init() {
 
 	var ww = $("#container").innerWidth();
@@ -199,8 +181,6 @@ function onDocumentMouseDown(event) {
 	raycaster.setFromCamera(mouse, camera);
 	var intersects = raycaster.intersectObject(pickplane);
 	if (intersects.length > 0) {
-		//cyl.position.copy(intersects[0].point);
-		//buildSphere(10, intersects[0].point);
 		if(checked == "chair"){
 			buildChair(intersects[0].point);
 		}else if(checked == "table"){
