@@ -10,9 +10,10 @@
 
 <div style="float:left; margin-left: 10px; width:32vw;">
 	<div>
-		<input type='radio' id="radio1" name='c' value='chair' checked>chair
-		<input type='radio' id="radio2" name='c' value='table'>table
-		<input type='radio' id="radio3" name='c' value='nothing'>nothing(for OrbitControls)
+		<input type='radio' id="radio1" name='c' value='chair' checked><img src="https://i.imgur.com/e6lxM2Q.png" width="100px" height="100px"/>
+		<input type='radio' id="radio2" name='c' value='table'><img src="gifs/outdoorTable.gif" width="100px" height="100px"/><br>
+		<input type='radio' id="radio3" name='c' value='tableC'><img src="https://i.imgur.com/odC32uQ.png" width="100px" height="100px"/><br>
+		<input type='radio' id="radio4" name='c' value='nothing'>nothing(for OrbitControls)
 	</div>
 <br>
 	<p id='debugMsg' style="background-color:yellow"></p>
@@ -38,7 +39,7 @@ var pickplane;
 var checked = "chair";
 
 var cyl;
-var spheres = [];
+var furnitures = [];
 
 init();
 animate();
@@ -52,23 +53,27 @@ $('#radio2').click(function() {
 });
 
 $('#radio3').click(function() {
+	checked = "tableC";
+});
+
+$('#radio4').click(function() {
 	checked = "nothing";
 });
-/*
+
 $('#clear').click(function() {
 
-	spheres.forEach(function(sphere) {
-		scene.remove(sphere);
+	furnitures.forEach(function(f) {
+		scene.remove(f);
 	});
-	spheres = [];
+	furnitures = [];
 
 });
 
 $('#save').click(function() {
 
 	var states = [];
-	spheres.forEach(function(sphere) {
-		states.push(sphere.name);
+	furnitures.forEach(function(f) {
+		states.push(f.name);
 	});
 
 	localStorage.setItem('stateStr', JSON.stringify(states));
@@ -81,10 +86,15 @@ $('#restore').click(function() {
 	states.forEach(function(stateStr) {
 		console.log(stateStr);
 		var state = JSON.parse(stateStr);
-		buildSphere(state.rad, new THREE.Vector3(state.pos[0], 0, state.pos[1]));
+		if(state.type == "chair")
+			buildChair(new THREE.Vector3(state.pos[0], 0, state.pos[1]));
+		else if(state.type == "table")
+			buildTable(new THREE.Vector3(state.pos[0], 0, state.pos[1]));
+		else if(state.type == "tableC")
+			buildTableC(new THREE.Vector3(state.pos[0], 0, state.pos[1]));
 	});
 
-});*/
+});
 
 function buildSphere(rad, pos) {
 
@@ -99,7 +109,7 @@ function buildSphere(rad, pos) {
 	sphere.name = JSON.stringify(prop);
 	console.log(sphere.name);
 
-	spheres.push(sphere);
+	furnitures.push(sphere);
 	sphere.position.copy(pos);
 
 }
@@ -144,8 +154,8 @@ function init() {
 
 	controls = new THREE.OrbitControls(camera, renderer.domElement);
 	window.addEventListener('resize', onWindowResize, false);
-	window.addEventListener('mousemove', onDocumentMouseMove, false);
-	window.addEventListener('mousedown', onDocumentMouseDown, false);
+	window.addEventListener('pointermove', onDocumentMouseMove, false);
+	window.addEventListener('pointerdown', onDocumentMouseDown, false);
 	//$('#container').on("pointerdown", onDocumentMouseDown);
 	/////////////////////////////////
 	buildScene();
@@ -195,6 +205,9 @@ function onDocumentMouseDown(event) {
 			buildChair(intersects[0].point);
 		}else if(checked == "table"){
 			buildTable(intersects[0].point);
+		}
+		else if(checked == "tableC"){
+			buildTableC(intersects[0].point);
 		}
 	}
 }
@@ -267,22 +280,33 @@ function buildChair(pos){
 	chair.add(leg, leg1, leg2, leg3, cus, back);
 	chair.position.copy(pos);
 	scene.add(chair);
+	
+	//json
+	var prop = {
+		type:"chair",
+		pos: [pos.x, pos.z]
+	};
+	console.log(prop);
+	chair.name = JSON.stringify(prop);
+	console.log(chair.name);
+
+	furnitures.push(chair);
 }
 
 function buildTable(pos){
 	let table = new THREE.Group();
-  
-  let loader = new THREE.TextureLoader()
+
+	let loader = new THREE.TextureLoader()
 	loader.crossOrigin = '';
-	
+
 	let tex = loader.load("https://i.imgur.com/GzFhr0k.png");
-  
-  let plane = new THREE.Mesh( new THREE.BoxGeometry( 30, 10.5, 0.5 ), new THREE.MeshPhongMaterial( {map: tex} ) );
-  plane.position.y = 10.25;
-  plane.rotation.x = Math.PI/2;
-  plane.rotation.z = Math.PI/2;
-  
-  let shape = new THREE.Shape();
+
+	let plane = new THREE.Mesh( new THREE.BoxGeometry( 30, 10.5, 0.5 ), new THREE.MeshPhongMaterial( {map: tex} ) );
+	plane.position.y = 10.25;
+	plane.rotation.x = Math.PI/2;
+	plane.rotation.z = Math.PI/2;
+
+	let shape = new THREE.Shape();
 	shape.moveTo( 0, 0 );
 	shape.lineTo( 1, 0 );
 	shape.lineTo( 5, 5 );
@@ -292,10 +316,10 @@ function buildTable(pos){
 	shape.lineTo( 10, 10 );
 	shape.lineTo( 9, 10 );
 	shape.lineTo( 5, 6 );
-  shape.lineTo( 1, 10 );
-  shape.lineTo( 0, 10 );
-  shape.lineTo( 4.5, 5.5 );
-  shape.lineTo( 0, 0 );
+	shape.lineTo( 1, 10 );
+	shape.lineTo( 0, 10 );
+	shape.lineTo( 4.5, 5.5 );
+	shape.lineTo( 0, 0 );
 
 	const extrudeSettings = {
 		steps: 2,
@@ -304,16 +328,82 @@ function buildTable(pos){
 	};
 
 	let leg = new THREE.Mesh( new THREE.ExtrudeGeometry( shape, extrudeSettings ), new THREE.MeshPhongMaterial({color:0x4f4f4f})) ;
-  leg.position.set(-5, 0, 14.25);
-  let leg2 = new THREE.Mesh( new THREE.ExtrudeGeometry( shape, extrudeSettings ), new THREE.MeshPhongMaterial({color:0x4f4f4f})) ;
-  leg2.position.set(-5, 0, -14.75);
-  let legL = new THREE.Mesh( new THREE.BoxGeometry( 1, 1, 29 ), new THREE.MeshPhongMaterial({color:0x4f4f4f})) ;
-  legL.position.y = 5;
-  legL.rotation.z = -Math.PI/4;
+	leg.position.set(-5, 0, 14.25);
+	let leg2 = new THREE.Mesh( new THREE.ExtrudeGeometry( shape, extrudeSettings ), new THREE.MeshPhongMaterial({color:0x4f4f4f})) ;
+	leg2.position.set(-5, 0, -14.75);
+	let legL = new THREE.Mesh( new THREE.BoxGeometry( 1, 1, 29 ), new THREE.MeshPhongMaterial({color:0x4f4f4f})) ;
+	legL.position.y = 5;
+	legL.rotation.z = -Math.PI/4;
 
 	table.add(leg, leg2, legL, plane);
 	table.position.copy(pos);
 	scene.add(table);
+	
+	//json
+	var prop = {
+		type:"table",
+		pos: [pos.x, pos.z]
+	};
+	console.log(prop);
+	table.name = JSON.stringify(prop);
+	console.log(table.name);
+
+	furnitures.push(table);
+}
+
+function buildTableC(pos){
+	let table = new THREE.Group();
+
+	let loader = new THREE.TextureLoader()
+	loader.crossOrigin = '';
+
+	let tex = loader.load("https://i.imgur.com/GzFhr0k.png");
+
+	let plane = new THREE.Mesh( new THREE.CylinderGeometry( 10, 10, 1, 32 ), new THREE.MeshBasicMaterial( {map:tex} ) );
+	plane.position.y = 10.5;
+
+	let shape = new THREE.Shape();
+	shape.moveTo( 0, 0 );
+	shape.lineTo( 1, 0 );
+	shape.lineTo( 5, 5 );
+	shape.lineTo( 9, 0 );
+	shape.lineTo( 10, 0 );
+	shape.lineTo( 5.5, 5.5 );
+	shape.lineTo( 10, 10 );
+	shape.lineTo( 9, 10 );
+	shape.lineTo( 5, 6 );
+	shape.lineTo( 1, 10 );
+	shape.lineTo( 0, 10 );
+	shape.lineTo( 4.5, 5.5 );
+	shape.lineTo( 0, 0 );
+
+	const extrudeSettings = {
+		steps: 2,
+		depth: 0.5,
+		bevelEnabled: true,
+	};
+
+	let leg = new THREE.Mesh( new THREE.ExtrudeGeometry( shape, extrudeSettings ), new THREE.MeshPhongMaterial({color:0x4f4f4f})) ;
+	leg.position.set(-5, 0, 0);
+
+	let leg2 = new THREE.Mesh( new THREE.ExtrudeGeometry( shape, extrudeSettings ), new THREE.MeshPhongMaterial({color:0x4f4f4f})) ;
+	leg2.position.set(0, 0, 5);
+	leg2.rotation.y = Math.PI/2;
+  
+	table.add(plane, leg, leg2);
+	table.position.copy(pos);
+	scene.add(table);
+	
+	//json
+	var prop = {
+		type:"tableC",
+		pos: [pos.x, pos.z]
+	};
+	console.log(prop);
+	table.name = JSON.stringify(prop);
+	console.log(table.name);
+
+	furnitures.push(table);
 }
 </script>
 
