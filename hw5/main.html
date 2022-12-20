@@ -62,9 +62,6 @@ function getPos () {
 	//console.log(pos.x, minX)
 	$.get( "http://127.0.0.1:1337/api?X="+pos.x+"&Y="+ pos.y+"&R="+ slider.value+"&minX="+ minX+"&minY="+ minY+"&maxX="+ maxX+"&maxY="+ maxY, function( data ) {
 		if(data && data.output){
-			//var coords = data.output.split (" ");
-			//disc.position.set (10*coords[0], 10*coords[1], 0.0);
-			//console.log (theta + ": " + coords[0] + ", " + coords[1]);
 			
 			var coll = data.output;
 			if(coll === true){
