@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<body style='overflow:hidden'> 
+
+<h1 style="text-align:center;color:red"> hw5 - node.js </h1>
+<hr>
+
+<div id="container" style="float:left; margin:3px; width:40vw; height:40vw;border: 1px solid #3B6273;">
+</div>
+
+<div style="float:left; margin-left: 10px; width:32vw;">
+	
+	<p style="font-size:20px;color:brown">radius:
+	<input type="range" min="1" max="20" step="1" value="10" id="cirRange">
+	</p>
+	<br>
+	<input type="checkbox" id="sound" name="sound" value="sound" style="width:20px;height:20px;">
+	<label for="sound" style="font-size:20px;color:brown">sound</label><br>
+	
+<br>
+	<p id='debugMsg' style="background-color:yellow"></p>
+	<button id='sp' style="width:100%;height:50px;border-radius:10px">start/pause</button>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="https://threejs.org/build/three.min.js"></script>
+
+<script>
+javascript:(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='https://mrdoob.github.io/stats.js/build/stats.min.js';document.head.appendChild(script);})()
+
+// my script
+
+var camera, scene, renderer;
+var circle, pos, vel, plane;
+var raycaster = new THREE.Raycaster();
+var mouse = new THREE.Vector2();
+var pickplane;
+var moving = false;
+var slider = document.getElementById("cirRange");
+
+init();
+animate();
+
+$('#sp').click(function() {
+	moving =! moving;
+});
+
+$('#cirRange').click(function() {
+	circle.geometry.dispose();
+	circle.geometry = new THREE.CircleGeometry(slider.value, 20);
+});
+
+//node.js
+function getPos () {
+	// Call api 
+	// Need to be replaced by a public ip address
+	let minX = plane.position.x-20;
+	let minY = plane.position.y-10;
+	let maxX = plane.position.x+20;
+	let maxY = plane.position.y+20;
+	//console.log(pos.x, minX)
+	$.get( "http://127.0.0.1:1337/api?X="+pos.x+"&Y="+ pos.y+"&R="+ slider.value+"&minX="+ minX+"&minY="+ minY+"&maxX="+ maxX+"&maxY="+ maxY, function( data ) {
+		if(data && data.output){
+			//var coords = data.output.split (" ");
+			//disc.position.set (10*coords[0], 10*coords[1], 0.0);
+			//console.log (theta + ": " + coords[0] + ", " + coords[1]);
+			
+			var coll = data.output;
+			if(coll === true){
+				$('#debugMsg').text("Collision!");
+			}
+			else{
+				$('#debugMsg').text(" ");
+			}
+			console.log('1');
+		}
+	});
+}
+
+function init() {
+
+	var ww = $("#container").innerWidth();
+	var hh = $("#container").innerHeight();
+	renderer = new THREE.WebGLRenderer();
+	renderer.setSize(ww, hh);
+	renderer.setClearColor(0x888888);
+	$("#container").append(renderer.domElement);
+
+	////////////////////////////////////////////////
+	scene = new THREE.Scene();
+
+	camera = new THREE.OrthographicCamera(-100, 100, 100, -100, -10, 100);
+	camera.position.z = 50;
+
+	////////////////////////////////////////////////////////
+	var gridXZ = new THREE.GridHelper(200, 20, 'red', 'white');
+	gridXZ.rotation.x = Math.PI / 2;
+	scene.add(gridXZ);
+
+	let geometry = new THREE.BufferGeometry();
+	let points = [];
+	points.push(
+	new THREE.Vector3(-80, -80, 0),
+	new THREE.Vector3(80, -80, 0),
+	new THREE.Vector3(80, 80, 0),
+	new THREE.Vector3(-80, 80, 0),
+	new THREE.Vector3(-80, -80, 0));
+	geometry.setFromPoints(points);
+	var border = new THREE.Line(geometry, new THREE.LineBasicMaterial({
+		color: 'blue'
+	}));
+	scene.add(border);
+
+	circle = new THREE.Mesh(new THREE.CircleGeometry(10, 20), new THREE.MeshBasicMaterial({
+		color: 'yellow'
+	}));
+	scene.add(circle);
+	
+	plane = new THREE.Mesh(new THREE.PlaneGeometry(40, 20), new THREE.MeshBasicMaterial({
+		color: 'blue'
+	}));
+	scene.add(plane);
+	
+	pickplane = new THREE.Mesh(new THREE.PlaneGeometry(160, 160),
+	new THREE.MeshBasicMaterial({
+		color: 0xff1234
+	}));
+	scene.add(pickplane);
+	pickplane.material.visible = false;
+
+	pos = new THREE.Vector3();
+	vel = new THREE.Vector3(10, 20);
+	
+	window.addEventListener('pointerdown', onDocumentPointerDown, false);
+	
+	setInterval(getPos, 500);
+}
+
+function onWindowResize() {
+	var ww = $("#container").innerWidth();
+	var hh = $("#container").innerHeight();
+
+	camera.aspect = ww / hh;
+	camera.updateProjectionMatrix();
+	renderer.setSize(ww, hh);
+}
+
+function animate() {
+
+	var dt = 0.05;
+	
+	let ss = parseInt(slider.value);
+
+	pos.add(vel.clone().multiplyScalar(dt));
+	if (pos.x > (80-ss))
+		vel.x = -10;
+	else if (pos.x < (-80+ss))
+		vel.x = 10;
+	if (pos.y > (80-ss))
+		vel.y = -20;
+	else if (pos.y < (-80+ss))
+		vel.y = 20;
+
+	if (pos.x > 0)
+		circle.material.color.set('cyan');
+	else
+		circle.material.color.set('yellow');
+	circle.position.copy(pos);
+	
+	onWindowResize();
+	render();
+	requestAnimationFrame(animate);
+}
+
+function render() {
+	renderer.render(scene, camera);
+}
+
+function onDocumentPointerDown(event) {
+
+	//event.preventDefault(); //slider can't use
+
+	var viewportPos = $('#container').get(0).getBoundingClientRect();
+	mouse.x = ((event.clientX - viewportPos.left) / $('#container').innerWidth()) * 2 - 1;
+	mouse.y = -((event.clientY - viewportPos.top) / $('#container').innerHeight()) * 2 + 1;
+
+	raycaster.setFromCamera(mouse, camera);
+	var intersects = raycaster.intersectObject(pickplane);
+	if (intersects.length > 0) {
+		plane.position.copy(intersects[0].point);
+	}
+}
+</script>
+
+</body>
+</html>
