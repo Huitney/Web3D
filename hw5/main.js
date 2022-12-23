@@ -2,6 +2,8 @@ var shelljs = require('shelljs');
 var express = require('express');
 var app = express();
 
+app.use(express.static('public'));
+
 app.get('/', function(req, res){
 	res.sendFile(__dirname + '/main.html');
 });
@@ -17,15 +19,13 @@ app.get ('/api', function (req, res) {
 	var maxY = req.query.maxY;
 
 		
-	shelljs.exec('circle-rect.cpp ' + X + ' ' + Y + ' ' + R + ' ' + minX + ' ' + minY + ' ' + maxX + ' ' + maxY, function(status, output, err) {
+	shelljs.exec('main.exe ' + [X, Y, R, minX, minY, maxX, maxY], function(status, output) {
 		console.log('Exit status:', status);
 		console.log('Program output:', output);
-		console.log('Program error:', err);
 
 		var output = {
 			status: status,
-			output: output,
-			err: err
+			output: output
 		};
 
 			

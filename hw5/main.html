@@ -18,7 +18,7 @@
 	<label for="sound" style="font-size:20px;color:brown">sound</label><br>
 	
 <br>
-	<p id='debugMsg' style="background-color:yellow"></p>
+	<p id='debugMsg' style="background-color:yellow"> </p>
 	<button id='sp' style="width:100%;height:50px;border-radius:10px">start/pause</button>
 
 </div>
@@ -66,11 +66,13 @@ function getPos () {
 			var coll = data.output;
 			if(coll === true){
 				$('#debugMsg').text("Collision!");
+				circle.material.color.set('yellow');
 			}
 			else{
 				$('#debugMsg').text(" ");
+				circle.material.color.set('cyan');
 			}
-			console.log('1');
+			console.log(coll);
 		}
 	});
 }
@@ -159,10 +161,6 @@ function animate() {
 	else if (pos.y < (-80+ss))
 		vel.y = 20;
 
-	if (pos.x > 0)
-		circle.material.color.set('cyan');
-	else
-		circle.material.color.set('yellow');
 	circle.position.copy(pos);
 	
 	onWindowResize();

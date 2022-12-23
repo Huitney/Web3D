@@ -11,17 +11,13 @@ from "Graphics Gems", Academic Press, 1990
 //boolean Check_Intersect(R, C, Rad)
 /* Return TRUE iff rectangle R intersects circle with centerpoint C and
    radius Rad. */
-static boolean Check_Intersect(
- Box2 *R,
- Point2 *C,
- double Rad)
-{
- double Rad2;
+static boolean Check_Intersect(Box2 *R,Point2 *C,double Rad){
+	double Rad2;
 
- Rad2 = Rad * Rad;
- /* Translate coordinates, placing C at the origin. */
- R->max.x -= C->x;  R->max.y -= C->y;
- R->min.x -= C->x;  R->min.y -= C->y;
+	Rad2 = Rad * Rad;
+	/* Translate coordinates, placing C at the origin. */
+	R->max.x -= C->x;  R->max.y -= C->y;
+	R->min.x -= C->x;  R->min.y -= C->y;
 
  if (R->max.x < 0) 			/* R to left of circle center */
    	if (R->max.y < 0) 		/* R in lower left corner */
@@ -78,4 +74,3 @@ int main(int argc, char** argv) {
    
    printf ("%d\n", CircleRectCD (cx, cy, r, min, max));
 }
-
